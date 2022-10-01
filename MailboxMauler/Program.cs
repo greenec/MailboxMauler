@@ -58,12 +58,13 @@ using (var client = new ImapClient())
     IMailFolder inbox = client.Inbox;
     inbox.Open(FolderAccess.ReadWrite);
 
+    inbox.Expunge();
+
     Console.CancelKeyPress += delegate
     {
         Console.WriteLine("Ctrl + C captured. Disconnecting client and logging out.");
         inbox.Close(expunge: true);
         client.Disconnect(quit: true);
-        client.Dispose();
     };
 
     IMailFolder trash = client.GetFolder("Trash");
@@ -93,6 +94,8 @@ using (var client = new ImapClient())
             Console.WriteLine($"Skipping: Date: {message.Date}, Subject: {message.Subject}");
         }
     }
+
+    inbox.Expunge();
 
     inbox.Close(expunge: true);
     client.Disconnect(quit: true);
