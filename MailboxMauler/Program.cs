@@ -50,12 +50,6 @@ do
 
 using (var client = new ImapClient())
 {
-    Console.CancelKeyPress += delegate
-    {
-        Console.WriteLine("Ctrl + C captured. Disconnecting client and logging out.");
-        client.Disconnect(quit: true);
-    };
-
     client.Connect(imapHost, imapPort, useSsl);
 
     client.Authenticate(username, password);
@@ -63,6 +57,14 @@ using (var client = new ImapClient())
     // the Inbox folder is always available on all IMAP servers
     IMailFolder inbox = client.Inbox;
     inbox.Open(FolderAccess.ReadWrite);
+
+    Console.CancelKeyPress += delegate
+    {
+        Console.WriteLine("Ctrl + C captured. Disconnecting client and logging out.");
+        inbox.Close(expunge: true);
+        client.Disconnect(quit: true);
+        client.Dispose();
+    };
 
     IMailFolder trash = client.GetFolder("Trash");
     if (!trash.Exists)
@@ -92,6 +94,7 @@ using (var client = new ImapClient())
         }
     }
 
+    inbox.Close(expunge: true);
     client.Disconnect(quit: true);
 }
 
